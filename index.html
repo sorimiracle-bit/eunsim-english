@@ -263,11 +263,8 @@
   var state = clone(SEED);
   var dirty = false, saveTimer = null, saving = false;
 
-  // Outside Claude (e.g. GitHub Pages) there is no window.claude: edit locally on this device.
-  if (!window.claude || typeof window.claude.use !== "function") {
-    mode = "local";
-    try { var s = localStorage.getItem(LOCAL_KEY); if (s) state = JSON.parse(s); } catch(e){}
-  }
+  // Outside Claude (e.g. GitHub Pages) the page is view-only; the list comes from the embedded data.
+  var inClaude = !!(window.claude && typeof window.claude.use === "function");
 
   // ---------- helpers ----------
   function parseId(url){
@@ -441,9 +438,9 @@
   });
 
   // ---------- start ----------
-  if (mode === "local") setMode("local"); else render();
+  render();
 
-  if (mode === "view") {
+  if (inClaude) {
     Promise.all([window.claude.use("artifact"), window.claude.use("user")]).then(function(r){
       var a = r[0], u = r[1];
       if (!a || !u) return;                       // stay read-only
